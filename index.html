@@ -10,44 +10,43 @@ body {
   color:#e6e6e6;
   font-family:monospace;
   margin:0;
+  padding:1.5vh 1.5vw;
   overflow:hidden;
 }
 
-/* 🔥 CENTER + SCALE CONTAINER */
-#app-wrapper {
-  width:100vw;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* 🔥 Responsive typography */
+h1 {
+  text-align:center;
+  margin:1vh 0;
+  font-size:clamp(18px, 3vh, 36px);
 }
-
-#app {
-  transform-origin: top left;
-}
-
-h1 { text-align:center; margin-bottom:20px; }
 
 .container {
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:20px;
-  height:80vh;
+  gap:1.5vw;
+  height:calc(100vh - 12vh);
 }
 
 .section {
-  padding:15px;
+  padding:1.5vh;
   background:#1a1d24;
   border-radius:10px;
   overflow:hidden;
 }
 
+.section h2 {
+  font-size:clamp(14px, 2vh, 24px);
+  margin-bottom:1vh;
+}
+
+/* 🔥 Rows scale with screen */
 .flip-row, .line-status {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  font-size:1.3em;
-  margin:14px 0;
+  font-size:clamp(12px, 1.8vh, 22px);
+  margin:1vh 0;
 }
 
 .left { display:flex; }
@@ -57,8 +56,8 @@ h1 { text-align:center; margin-bottom:20px; }
   display:inline-block;
   background:#111;
   border-radius:2px;
-  padding:1px 3px;
-  margin-right:1px;
+  padding:0.2vh 0.4vw;
+  margin-right:0.2vw;
   perspective:600px;
 }
 
@@ -66,24 +65,34 @@ h1 { text-align:center; margin-bottom:20px; }
   display:block;
   transform-origin:top;
   transition:transform 0.25s ease;
-  min-width:11px;
+  min-width:0.8ch;
   text-align:center;
 }
 
 .updated {
   text-align:center;
   color:#888;
-  margin-top:20px;
+  font-size:clamp(10px, 1.5vh, 18px);
+  margin-top:1vh;
 }
 
-.section h2 { font-size:1.4em; margin-bottom:10px; }
+/* 📱 Landscape optimization */
+@media (orientation: landscape) {
+  .container {
+    height:calc(100vh - 10vh);
+  }
+}
+
+/* 📱 Very small screens */
+@media (max-height: 500px) {
+  .flip-row, .line-status {
+    margin:0.5vh 0;
+  }
+}
 </style>
 </head>
 
 <body>
-
-<div id="app-wrapper">
-<div id="app">
 
 <h1>TfL Dashboard</h1>
 
@@ -100,9 +109,6 @@ h1 { text-align:center; margin-bottom:20px; }
 </div>
 
 <div class="updated" id="updated"></div>
-
-</div>
-</div>
 
 <script>
 const lineColors = {
@@ -132,6 +138,7 @@ function mins(time){
   return Math.max(0,Math.round((new Date(time)-new Date())/60000));
 }
 
+/* CREATE CHAR */
 function createCharBox(char,color){
   const span=document.createElement("span");
   span.textContent=char;
@@ -144,6 +151,7 @@ function createCharBox(char,color){
   return box;
 }
 
+/* FLIP */
 function flipChar(span,target,color){
   const delay=Math.random()*60;
 
@@ -164,6 +172,7 @@ function flipChar(span,target,color){
   },delay);
 }
 
+/* UPDATE TEXT */
 function updateText(container,text,color,forceFlip=false){
   container.dataset.text=text;
   container.dataset.color=color;
@@ -191,22 +200,7 @@ function updateText(container,text,color,forceFlip=false){
   }
 }
 
-/* 🔥 SMART SCALE (UP + DOWN) */
-function scaleToFit(){
-  const app = document.getElementById("app");
-  const wrapper = document.getElementById("app-wrapper");
-
-  app.style.transform = "scale(1)";
-
-  const scaleX = wrapper.clientWidth / app.offsetWidth;
-  const scaleY = wrapper.clientHeight / app.offsetHeight;
-
-  const scale = Math.min(scaleX, scaleY);
-
-  app.style.transform = `scale(${scale})`;
-}
-
-/* 🔥 FLIP EVERY 12s */
+/* 🔥 GLOBAL FLIP */
 function idleFlip(){
   const rows=[
     ...document.querySelectorAll(".line-status"),
@@ -316,16 +310,13 @@ async function refresh(){
   await fetchStatus();
   await updateFlipboard();
   document.getElementById("updated").innerText="Updated: "+new Date().toLocaleTimeString();
-
-  setTimeout(scaleToFit,100);
 }
 
 refresh();
 setInterval(refresh,60000);
-setInterval(idleFlip,12000);
 
-window.addEventListener("resize", scaleToFit);
-setTimeout(scaleToFit,500);
+/* 🔥 flip every 12s */
+setInterval(idleFlip,12000);
 
 </script>
 </body>
