@@ -16,8 +16,8 @@ body {
 
 h1 {
   text-align:center;
-  margin:0.5vh 0;
-  font-size:3vh;
+  margin:1vh 0;
+  font-size:clamp(18px, 2.8vh, 32px);
 }
 
 /* LAYOUT */
@@ -25,7 +25,7 @@ h1 {
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:1vw;
-  height:88vh;
+  height:calc(100vh - 10vh);
 }
 
 .section {
@@ -38,11 +38,11 @@ h1 {
 }
 
 .section h2 {
-  font-size:2vh;
+  font-size:clamp(14px, 2vh, 22px);
   margin-bottom:0.5vh;
 }
 
-/* 🔥 FORCE EVEN DISTRIBUTION */
+/* FLEX CONTENT AREA */
 #status, #flipboard {
   display:flex;
   flex-direction:column;
@@ -50,26 +50,25 @@ h1 {
   flex:1;
 }
 
-/* ROWS SCALE PERFECTLY */
+/* TEXT SIZE BALANCED */
 .flip-row, .line-status {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  font-size:1.6vh; /* 🔥 key: scales with screen height */
-  line-height:1;
+  font-size:clamp(13px, 1.8vh, 22px);
+  margin:0.5vh 0;
 }
 
-/* ALIGNMENT */
 .left { display:flex; }
 .right { display:flex; justify-content:flex-end; }
 
-/* FLIPBOARD LETTER BOX */
+/* FLIPBOARD BOX */
 .char-box {
   display:inline-block;
   background:#111;
   border-radius:2px;
-  padding:0.15vh 0.25vw;
-  margin-right:0.1vw;
+  padding:0.2vh 0.3vw;
+  margin-right:0.15vw;
   perspective:600px;
 }
 
@@ -80,26 +79,21 @@ h1 {
   min-width:0.8ch;
   text-align:center;
 
-  /* 🔥 WHITE OUTLINE FOR LEGIBILITY */
-  text-shadow:
-    -1px -1px 0 #fff,
-     1px -1px 0 #fff,
-    -1px  1px 0 #fff,
-     1px  1px 0 #fff;
+  /* ✨ subtle glow instead of harsh outline */
+  text-shadow: 0 0 4px rgba(255,255,255,0.4);
 }
 
-/* FOOTER */
 .updated {
   text-align:center;
   color:#888;
-  font-size:1.5vh;
+  font-size:clamp(10px, 1.4vh, 16px);
   margin-top:0.5vh;
 }
 
-/* EXTRA SMALL SCREENS */
+/* SMALL HEIGHT SAFETY */
 @media (max-height: 500px) {
   .flip-row, .line-status {
-    font-size:1.3vh;
+    font-size:12px;
   }
 }
 </style>
@@ -151,7 +145,6 @@ function mins(time){
   return Math.max(0,Math.round((new Date(time)-new Date())/60000));
 }
 
-/* CREATE CHAR */
 function createCharBox(char,color){
   const span=document.createElement("span");
   span.textContent=char;
@@ -164,7 +157,6 @@ function createCharBox(char,color){
   return box;
 }
 
-/* FLIP */
 function flipChar(span,target,color){
   const delay=Math.random()*60;
 
@@ -185,7 +177,6 @@ function flipChar(span,target,color){
   },delay);
 }
 
-/* UPDATE TEXT */
 function updateText(container,text,color,forceFlip=false){
   container.dataset.text=text;
   container.dataset.color=color;
@@ -213,7 +204,7 @@ function updateText(container,text,color,forceFlip=false){
   }
 }
 
-/* 🔥 GLOBAL FLIP */
+/* 🔥 FLIP EVERY 12s */
 function idleFlip(){
   const rows=[
     ...document.querySelectorAll(".line-status"),
@@ -229,7 +220,6 @@ function idleFlip(){
   });
 }
 
-/* STATUS */
 async function fetchStatus(){
   const res=await fetch("https://api.tfl.gov.uk/Line/Mode/tube,elizabeth-line/Status");
   const data=await res.json();
@@ -266,7 +256,6 @@ async function fetchStatus(){
   });
 }
 
-/* EASTBOUND ONLY */
 async function fetchTrains(){
   const res=await fetch("https://api.tfl.gov.uk/Line/elizabeth/Arrivals");
   const data=await res.json();
@@ -289,7 +278,6 @@ async function fetchTrains(){
   }));
 }
 
-/* FLIPBOARD */
 async function updateFlipboard(){
   const trains=await fetchTrains();
   const container=document.getElementById("flipboard");
@@ -318,7 +306,6 @@ async function updateFlipboard(){
   });
 }
 
-/* REFRESH */
 async function refresh(){
   await fetchStatus();
   await updateFlipboard();
@@ -327,8 +314,6 @@ async function refresh(){
 
 refresh();
 setInterval(refresh,60000);
-
-/* 🔥 flip every 12s */
 setInterval(idleFlip,12000);
 </script>
 
