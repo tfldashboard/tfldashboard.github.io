@@ -14,35 +14,35 @@ body {
   overflow:hidden;
 }
 
+/* 🔥 BIG by default (desktop first) */
 h1 {
   text-align:center;
-  margin:1vh 0;
-  font-size:clamp(18px, 2.8vh, 32px);
+  margin:10px 0;
+  font-size:32px;
 }
 
-/* LAYOUT */
 .container {
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:1vw;
-  height:calc(100vh - 10vh);
+  gap:15px;
+  height:calc(100vh - 90px);
 }
 
 .section {
   display:flex;
   flex-direction:column;
-  padding:1vh;
+  padding:12px;
   background:#1a1d24;
   border-radius:10px;
   overflow:hidden;
 }
 
 .section h2 {
-  font-size:clamp(14px, 2vh, 22px);
-  margin-bottom:0.5vh;
+  font-size:20px;
+  margin-bottom:10px;
 }
 
-/* FLEX CONTENT AREA */
+/* FLEX CONTENT */
 #status, #flipboard {
   display:flex;
   flex-direction:column;
@@ -50,25 +50,25 @@ h1 {
   flex:1;
 }
 
-/* TEXT SIZE BALANCED */
+/* 🔥 NICE LARGE TEXT */
 .flip-row, .line-status {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  font-size:clamp(13px, 1.8vh, 22px);
-  margin:0.5vh 0;
+  font-size:20px;
+  margin:6px 0;
 }
 
 .left { display:flex; }
 .right { display:flex; justify-content:flex-end; }
 
-/* FLIPBOARD BOX */
+/* FLIPBOARD */
 .char-box {
   display:inline-block;
   background:#111;
   border-radius:2px;
-  padding:0.2vh 0.3vw;
-  margin-right:0.15vw;
+  padding:2px 4px;
+  margin-right:2px;
   perspective:600px;
 }
 
@@ -76,24 +76,34 @@ h1 {
   display:block;
   transform-origin:top;
   transition:transform 0.25s ease;
-  min-width:0.8ch;
+  min-width:12px;
   text-align:center;
-
-  /* ✨ subtle glow instead of harsh outline */
-  text-shadow: 0 0 4px rgba(255,255,255,0.4);
 }
 
+/* FOOTER */
 .updated {
   text-align:center;
   color:#888;
-  font-size:clamp(10px, 1.4vh, 16px);
-  margin-top:0.5vh;
+  font-size:14px;
+  margin-top:5px;
 }
 
-/* SMALL HEIGHT SAFETY */
-@media (max-height: 500px) {
+/* 📱 SCALE DOWN ONLY WHEN NEEDED */
+@media (max-height: 700px) {
   .flip-row, .line-status {
-    font-size:12px;
+    font-size:16px;
+  }
+}
+
+@media (max-height: 550px) {
+  .flip-row, .line-status {
+    font-size:13px;
+  }
+}
+
+@media (max-height: 450px) {
+  .flip-row, .line-status {
+    font-size:11px;
   }
 }
 </style>
