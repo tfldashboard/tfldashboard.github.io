@@ -10,54 +10,66 @@ body {
   color:#e6e6e6;
   font-family:monospace;
   margin:0;
-  padding:1.5vh 1.5vw;
+  padding:1vh 1vw;
   overflow:hidden;
 }
 
-/* 🔥 Responsive typography */
 h1 {
   text-align:center;
-  margin:1vh 0;
-  font-size:clamp(18px, 3vh, 36px);
+  margin:0.5vh 0;
+  font-size:3vh;
 }
 
+/* LAYOUT */
 .container {
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:1.5vw;
-  height:calc(100vh - 12vh);
+  gap:1vw;
+  height:88vh;
 }
 
 .section {
-  padding:1.5vh;
+  display:flex;
+  flex-direction:column;
+  padding:1vh;
   background:#1a1d24;
   border-radius:10px;
   overflow:hidden;
 }
 
 .section h2 {
-  font-size:clamp(14px, 2vh, 24px);
-  margin-bottom:1vh;
+  font-size:2vh;
+  margin-bottom:0.5vh;
 }
 
-/* 🔥 Rows scale with screen */
+/* 🔥 FORCE EVEN DISTRIBUTION */
+#status, #flipboard {
+  display:flex;
+  flex-direction:column;
+  justify-content:space-evenly;
+  flex:1;
+}
+
+/* ROWS SCALE PERFECTLY */
 .flip-row, .line-status {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  font-size:clamp(12px, 1.8vh, 22px);
-  margin:1vh 0;
+  font-size:1.6vh; /* 🔥 key: scales with screen height */
+  line-height:1;
 }
 
+/* ALIGNMENT */
 .left { display:flex; }
 .right { display:flex; justify-content:flex-end; }
 
+/* FLIPBOARD LETTER BOX */
 .char-box {
   display:inline-block;
   background:#111;
   border-radius:2px;
-  padding:0.2vh 0.4vw;
-  margin-right:0.2vw;
+  padding:0.15vh 0.25vw;
+  margin-right:0.1vw;
   perspective:600px;
 }
 
@@ -67,26 +79,27 @@ h1 {
   transition:transform 0.25s ease;
   min-width:0.8ch;
   text-align:center;
+
+  /* 🔥 WHITE OUTLINE FOR LEGIBILITY */
+  text-shadow:
+    -1px -1px 0 #fff,
+     1px -1px 0 #fff,
+    -1px  1px 0 #fff,
+     1px  1px 0 #fff;
 }
 
+/* FOOTER */
 .updated {
   text-align:center;
   color:#888;
-  font-size:clamp(10px, 1.5vh, 18px);
-  margin-top:1vh;
+  font-size:1.5vh;
+  margin-top:0.5vh;
 }
 
-/* 📱 Landscape optimization */
-@media (orientation: landscape) {
-  .container {
-    height:calc(100vh - 10vh);
-  }
-}
-
-/* 📱 Very small screens */
+/* EXTRA SMALL SCREENS */
 @media (max-height: 500px) {
   .flip-row, .line-status {
-    margin:0.5vh 0;
+    font-size:1.3vh;
   }
 }
 </style>
@@ -317,7 +330,7 @@ setInterval(refresh,60000);
 
 /* 🔥 flip every 12s */
 setInterval(idleFlip,12000);
-
 </script>
+
 </body>
 </html>
