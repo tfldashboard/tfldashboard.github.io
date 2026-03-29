@@ -9,8 +9,17 @@ body {
   background:#0f1115;
   color:#e6e6e6;
   font-family:monospace;
-  padding:20px;
+  margin:0;
   overflow:hidden;
+}
+
+/* 🔥 CENTER + SCALE CONTAINER */
+#app-wrapper {
+  width:100vw;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 #app {
@@ -73,6 +82,7 @@ h1 { text-align:center; margin-bottom:20px; }
 
 <body>
 
+<div id="app-wrapper">
 <div id="app">
 
 <h1>TfL Dashboard</h1>
@@ -91,7 +101,8 @@ h1 { text-align:center; margin-bottom:20px; }
 
 <div class="updated" id="updated"></div>
 
-</div> <!-- app -->
+</div>
+</div>
 
 <script>
 const lineColors = {
@@ -180,16 +191,17 @@ function updateText(container,text,color,forceFlip=false){
   }
 }
 
-/* 🔥 AUTO SCALE TO FIT SCREEN */
+/* 🔥 SMART SCALE (UP + DOWN) */
 function scaleToFit(){
   const app = document.getElementById("app");
+  const wrapper = document.getElementById("app-wrapper");
 
   app.style.transform = "scale(1)";
 
-  const availableHeight = window.innerHeight;
-  const contentHeight = app.offsetHeight;
+  const scaleX = wrapper.clientWidth / app.offsetWidth;
+  const scaleY = wrapper.clientHeight / app.offsetHeight;
 
-  const scale = Math.min(1, availableHeight / contentHeight);
+  const scale = Math.min(scaleX, scaleY);
 
   app.style.transform = `scale(${scale})`;
 }
@@ -305,7 +317,7 @@ async function refresh(){
   await updateFlipboard();
   document.getElementById("updated").innerText="Updated: "+new Date().toLocaleTimeString();
 
-  setTimeout(scaleToFit, 100); // 🔥 rescale after content loads
+  setTimeout(scaleToFit,100);
 }
 
 refresh();
@@ -313,7 +325,7 @@ setInterval(refresh,60000);
 setInterval(idleFlip,12000);
 
 window.addEventListener("resize", scaleToFit);
-setTimeout(scaleToFit, 500);
+setTimeout(scaleToFit,500);
 
 </script>
 </body>
