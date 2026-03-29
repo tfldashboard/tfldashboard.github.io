@@ -64,6 +64,70 @@ h1 { text-align:center; margin-bottom:20px; }
 }
 
 .section h2 { font-size:1.4em; margin-bottom:10px; }
+
+/* ========================= */
+/* 📱 LANDSCAPE RESPONSIVE   */
+/* ========================= */
+
+/* Small landscape (phones/tablets) */
+@media (orientation: landscape) and (max-width: 900px) {
+  body { padding:10px; }
+
+  h1 { font-size:1.2em; }
+
+  .container {
+    gap:10px;
+    height:85vh;
+  }
+
+  .section {
+    padding:10px;
+  }
+
+  .flip-row, .line-status {
+    font-size:0.9em;
+    margin:8px 0;
+  }
+
+  .char-box {
+    padding:1px 2px;
+  }
+
+  .char-box span {
+    min-width:8px;
+  }
+}
+
+/* Medium landscape (laptops) */
+@media (orientation: landscape) and (min-width: 901px) and (max-width: 1400px) {
+  .flip-row, .line-status {
+    font-size:1.2em;
+    margin:12px 0;
+  }
+
+  .container {
+    height:82vh;
+  }
+}
+
+/* Large landscape (TV / dashboards) */
+@media (orientation: landscape) and (min-width: 1401px) {
+  h1 { font-size:2em; }
+
+  .flip-row, .line-status {
+    font-size:1.8em;
+    margin:18px 0;
+  }
+
+  .char-box span {
+    min-width:16px;
+  }
+
+  .container {
+    height:85vh;
+  }
+}
+
 </style>
 </head>
 
@@ -113,7 +177,6 @@ function mins(time){
   return Math.max(0,Math.round((new Date(time)-new Date())/60000));
 }
 
-/* CREATE CHAR BOX */
 function createCharBox(char,color){
   const span=document.createElement("span");
   span.textContent=char;
@@ -126,7 +189,6 @@ function createCharBox(char,color){
   return box;
 }
 
-/* FLIP ANIMATION */
 function flipChar(span,target,color){
   const delay=Math.random()*60;
 
@@ -147,7 +209,6 @@ function flipChar(span,target,color){
   },delay);
 }
 
-/* UPDATE TEXT (NOW FORCES FLIP WHEN REQUESTED) */
 function updateText(container,text,color,forceFlip=false){
   container.dataset.text=text;
   container.dataset.color=color;
@@ -162,7 +223,7 @@ function updateText(container,text,color,forceFlip=false){
     const span=container.childNodes[i].firstChild;
 
     if(forceFlip){
-      flipChar(span,c,color); // 🔥 always flip
+      flipChar(span,c,color);
     } else if(span.textContent!==c){
       flipChar(span,c,color);
     } else {
@@ -175,7 +236,6 @@ function updateText(container,text,color,forceFlip=false){
   }
 }
 
-/* 🔥 IDLE FLIP EVERY 12s */
 function idleFlip(){
   const rows=[
     ...document.querySelectorAll(".line-status"),
@@ -188,12 +248,11 @@ function idleFlip(){
     [...row.children].forEach(container=>{
       const text=container.dataset.text;
       const color=container.dataset.color;
-      if(text) updateText(container,text,color,true); // 🔥 force flip
+      if(text) updateText(container,text,color,true);
     });
   });
 }
 
-/* STATUS */
 async function fetchStatus(){
   const res=await fetch("https://api.tfl.gov.uk/Line/Mode/tube,elizabeth-line/Status");
   const data=await res.json();
@@ -230,7 +289,6 @@ async function fetchStatus(){
   });
 }
 
-/* 🚆 EASTBOUND ONLY */
 async function fetchTrains(){
   const res=await fetch("https://api.tfl.gov.uk/Line/elizabeth/Arrivals");
   const data=await res.json();
@@ -253,7 +311,6 @@ async function fetchTrains(){
   }));
 }
 
-/* FLIPBOARD */
 async function updateFlipboard(){
   const trains=await fetchTrains();
   const container=document.getElementById("flipboard");
@@ -282,7 +339,6 @@ async function updateFlipboard(){
   });
 }
 
-/* REFRESH */
 async function refresh(){
   await fetchStatus();
   await updateFlipboard();
@@ -291,9 +347,7 @@ async function refresh(){
 
 refresh();
 setInterval(refresh,60000);
-
-/* 🔥 PERFECT FLIP EVERY 12s */
-setInterval(idleFlip,30000);
+setInterval(idleFlip,12000);
 
 </script>
 </body>
