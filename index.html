@@ -10,7 +10,11 @@ body {
   color:#e6e6e6;
   font-family:monospace;
   padding:20px;
-  overflow:hidden; /* ✅ no scroll */
+  overflow:hidden;
+}
+
+#app {
+  transform-origin: top left;
 }
 
 h1 { text-align:center; margin-bottom:20px; }
@@ -64,48 +68,12 @@ h1 { text-align:center; margin-bottom:20px; }
 }
 
 .section h2 { font-size:1.4em; margin-bottom:10px; }
-
-/* 🔥 LANDSCAPE AUTO-FIT (NO SCROLL) */
-@media (orientation: landscape) {
-
-  h1 {
-    font-size:2.5vh;
-    margin-bottom:1vh;
-  }
-
-  .container {
-    height:85vh;
-    gap:1.5vh;
-  }
-
-  .section {
-    padding:1vh;
-  }
-
-  .section h2 {
-    font-size:2vh;
-    margin-bottom:0.5vh;
-  }
-
-  .flip-row, .line-status {
-    font-size:1.8vh; /* 🔥 scales with screen height */
-    margin:0.8vh 0;
-  }
-
-  .char-box {
-    padding:0.2vh 0.4vh;
-    margin-right:0.2vh;
-  }
-
-  .updated {
-    font-size:1.5vh;
-    margin-top:1vh;
-  }
-}
 </style>
 </head>
 
 <body>
+
+<div id="app">
 
 <h1>TfL Dashboard</h1>
 
@@ -123,9 +91,9 @@ h1 { text-align:center; margin-bottom:20px; }
 
 <div class="updated" id="updated"></div>
 
-<script>
-/* ✅ YOUR JS — UNCHANGED */
+</div> <!-- app -->
 
+<script>
 const lineColors = {
   "Bakerloo":"#B36305","Central":"#E32017","Circle":"#FFD300","District":"#00782A",
   "Hammersmith & City":"#F3A9BB","Jubilee":"#A0A5A9","Metropolitan":"#9B0056","Northern":"#000000",
@@ -212,6 +180,21 @@ function updateText(container,text,color,forceFlip=false){
   }
 }
 
+/* 🔥 AUTO SCALE TO FIT SCREEN */
+function scaleToFit(){
+  const app = document.getElementById("app");
+
+  app.style.transform = "scale(1)";
+
+  const availableHeight = window.innerHeight;
+  const contentHeight = app.offsetHeight;
+
+  const scale = Math.min(1, availableHeight / contentHeight);
+
+  app.style.transform = `scale(${scale})`;
+}
+
+/* 🔥 FLIP EVERY 12s */
 function idleFlip(){
   const rows=[
     ...document.querySelectorAll(".line-status"),
@@ -227,6 +210,7 @@ function idleFlip(){
   });
 }
 
+/* STATUS */
 async function fetchStatus(){
   const res=await fetch("https://api.tfl.gov.uk/Line/Mode/tube,elizabeth-line/Status");
   const data=await res.json();
@@ -263,6 +247,7 @@ async function fetchStatus(){
   });
 }
 
+/* EASTBOUND ONLY */
 async function fetchTrains(){
   const res=await fetch("https://api.tfl.gov.uk/Line/elizabeth/Arrivals");
   const data=await res.json();
@@ -285,6 +270,7 @@ async function fetchTrains(){
   }));
 }
 
+/* FLIPBOARD */
 async function updateFlipboard(){
   const trains=await fetchTrains();
   const container=document.getElementById("flipboard");
@@ -313,17 +299,21 @@ async function updateFlipboard(){
   });
 }
 
+/* REFRESH */
 async function refresh(){
   await fetchStatus();
   await updateFlipboard();
   document.getElementById("updated").innerText="Updated: "+new Date().toLocaleTimeString();
+
+  setTimeout(scaleToFit, 100); // 🔥 rescale after content loads
 }
 
 refresh();
 setInterval(refresh,60000);
-
-/* 🔥 FLIP EVERY 12s */
 setInterval(idleFlip,12000);
+
+window.addEventListener("resize", scaleToFit);
+setTimeout(scaleToFit, 500);
 
 </script>
 </body>
