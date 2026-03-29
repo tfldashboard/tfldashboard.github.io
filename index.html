@@ -16,30 +16,26 @@ body {
   color:#e6e6e6;
   font-family:monospace;
   overflow:hidden;
-
   display:flex;
   flex-direction:column;
 }
 
-/* Header */
 h1 {
   text-align:center;
   margin:10px 0;
   flex:0 0 auto;
 }
 
-/* Container now FLEXES instead of fixed height */
+/* 🔥 USE REAL VIEWPORT HEIGHT */
 .container {
   flex:1;
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
-
-  /* 🔥 THIS FIXES TOOLBAR BUG */
-  height:100dvh;
-  height:100vh; /* fallback */
   padding:10px;
   box-sizing:border-box;
+
+  height:calc(var(--vh, 1vh) * 100);
 }
 
 .section {
@@ -51,13 +47,11 @@ h1 {
   padding:10px;
 }
 
-/* Section headers */
 .section h2 {
   margin:0 0 6px 0;
   flex:0 0 auto;
 }
 
-/* Content areas expand properly */
 #status, #flipboard {
   flex:1;
   display:flex;
@@ -65,20 +59,17 @@ h1 {
   justify-content:space-evenly;
 }
 
-/* Rows */
 .flip-row, .line-status {
   display:flex;
   justify-content:space-between;
   align-items:center;
 
-  /* 🔥 responsive but readable */
   font-size:clamp(14px, 2.2vh, 28px);
 }
 
 .left { display:flex; }
 .right { display:flex; justify-content:flex-end; }
 
-/* Flipboard characters */
 .char-box {
   display:inline-block;
   background:#111;
@@ -95,12 +86,10 @@ h1 {
   min-width:10px;
   text-align:center;
 
-  /* clean readability without glow */
   font-weight:600;
   letter-spacing:0.5px;
 }
 
-/* Footer */
 .updated {
   text-align:center;
   color:#888;
@@ -109,17 +98,10 @@ h1 {
   flex:0 0 auto;
 }
 
-/* 🔥 LANDSCAPE OPTIMISATION */
+/* Landscape only (as requested) */
 @media (orientation: landscape) {
   .container {
     grid-template-columns:1fr 1fr;
-  }
-}
-
-/* 🔥 SMALL HEIGHT FIX (prevents cutoff) */
-@media (max-height: 500px) {
-  .flip-row, .line-status {
-    font-size:clamp(12px, 2vh, 20px);
   }
 }
 </style>
@@ -144,6 +126,16 @@ h1 {
 <div class="updated" id="updated"></div>
 
 <script>
+
+/* 🔥 REAL VIEWPORT HEIGHT FIX */
+function setRealViewportHeight() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+setRealViewportHeight();
+window.addEventListener('resize', setRealViewportHeight);
+
 const lineColors = {
   "Bakerloo":"#B36305","Central":"#E32017","Circle":"#FFD300","District":"#00782A",
   "Hammersmith & City":"#F3A9BB","Jubilee":"#A0A5A9","Metropolitan":"#9B0056","Northern":"#000000",
@@ -171,7 +163,6 @@ function mins(time){
   return Math.max(0,Math.round((new Date(time)-new Date())/60000));
 }
 
-/* CREATE BOX */
 function createCharBox(char,color){
   const span=document.createElement("span");
   span.textContent=char;
@@ -184,7 +175,6 @@ function createCharBox(char,color){
   return box;
 }
 
-/* FLIP */
 function flipChar(span,target,color){
   const delay=Math.random()*60;
 
@@ -205,7 +195,6 @@ function flipChar(span,target,color){
   },delay);
 }
 
-/* UPDATE TEXT */
 function updateText(container,text,color,forceFlip=false){
   container.dataset.text=text;
   container.dataset.color=color;
@@ -348,6 +337,7 @@ async function refresh(){
 refresh();
 setInterval(refresh,60000);
 setInterval(idleFlip,12000);
+
 </script>
 
 </body>
