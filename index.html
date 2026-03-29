@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TfL Dashboard</title>
+
+<style>
+body {
+  background:#0f1115;
+  color:#e6e6e6;
+  font-family:monospace;
+  padding:20px;
+  overflow:hidden;
+}
+
+h1 { text-align:center; margin-bottom:20px; }
+
+.container {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  height:80vh;
+}
+
+.section {
+  padding:15px;
+  background:#1a1d24;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.flip-row, .line-status {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:1.3em;
+  margin:14px 0;
+}
+
+.left { display:flex; }
+.right { display:flex; justify-content:flex-end; }
+
+.char-box {
+  display:inline-block;
+  background:#111;
+  border-radius:2px;
+  padding:1px 3px;
+  margin-right:1px;
+  perspective:600px;
+}
+
+.char-box span {
+  display:block;
+  transform-origin:top;
+  transition:transform 0.25s ease;
+  min-width:11px;
+  text-align:center;
+}
+
+.updated {
+  text-align:center;
+  color:#888;
+  margin-top:20px;
+}
+
+.section h2 { font-size:1.4em; margin-bottom:10px; }
+</style>
+</head>
+
+<body>
+
+<h1>TfL Dashboard</h1>
+
+<div class="container">
+  <div class="section">
+    <h2>Line Status</h2>
+    <div id="status"></div>
+  </div>
+
+  <div class="section">
+    <h2>Departures</h2>
+    <div id="flipboard"></div>
+  </div>
+</div>
+
+<div class="updated" id="updated"></div>
+
+<script>
+const lineColors = {
+  "Bakerloo":"#B36305","Central":"#E32017","Circle":"#FFD300","District":"#00782A",
+  "Hammersmith & City":"#F3A9BB","Jubilee":"#A0A5A9","Metropolitan":"#9B0056","Northern":"#000000",
+  "Piccadilly":"#003688","Victoria":"#0098D4","Waterloo & City":"#95CDBA",
+  "Elizabeth line":"#6950A1","Elizabeth":"#6950A1"
+};
+
+const shortLines = {
+  "Elizabeth line":"Elizabeth",
+  "Hammersmith & City":"Hammersmith",
+  "Waterloo & City":"Waterloo"
+};
+
+const shortStations = {
+  "Stratford (London) Rail Station":"Stratford",
+  "Hayes & Harlington Rail Station":"Hayes & Harlington",
+  "Maidenhead Rail Station":"Maidenhead",
+  "Ealing Broadway Rail Station":"Ealing Broadway",
+  "London Paddington Rail Station":"Paddington"
+};
+
+const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 →";
+
+function mins(time){
+  return Math.max(0,Math.round((new Date(time)-new Date())/60000));
+}
+
+/* CREATE CHAR BOX */
+function createCharBox(char,color){
+  const span=document.createElement("span");
+  span.textContent=char;
+  span.style.color=color;
+
+  const box=document.createElement("div");
+  box.className="char-box";
+  box.appendChild(span);
+
+  return box;
+}
+
+/* FLIP ANIMATION */
+function flipChar(span,target,color){
+  const delay=Math.random()*60;
+
+  setTimeout(()=>{
+    span.style.transform="rotateX(-90deg)";
+
+    setTimeout(()=>{
+      span.textContent=chars[Math.floor(Math.random()*chars.length)];
+      span.style.color=color;
+    },80);
+
+    setTimeout(()=>{
+      span.textContent=target;
+      span.style.color=color;
+      span.style.transform="rotateX(0deg)";
+    },160);
+
+  },delay);
+}
+
+/* UPDATE TEXT (NOW FORCES FLIP WHEN REQUESTED) */
+function updateText(container,text,color,forceFlip=false){
+  container.dataset.text=text;
+  container.dataset.color=color;
+
+  const charsArr=text.split('');
+
+  while(container.childNodes.length<charsArr.length){
+    container.appendChild(createCharBox(" ",color));
+  }
+
+  charsArr.forEach((c,i)=>{
+    const span=container.childNodes[i].firstChild;
+
+    if(forceFlip){
+      flipChar(span,c,color); // 🔥 always flip
+    } else if(span.textContent!==c){
+      flipChar(span,c,color);
+    } else {
+      span.style.color=color;
+    }
+  });
+
+  while(container.childNodes.length>charsArr.length){
+    container.removeChild(container.lastChild);
+  }
+}
+
+/* 🔥 IDLE FLIP EVERY 12s */
+function idleFlip(){
+  const rows=[
+    ...document.querySelectorAll(".line-status"),
+    ...document.querySelectorAll(".flip-row")
+  ];
+
+  if(!rows.length) return;
+
+  rows.forEach(row=>{
+    [...row.children].forEach(container=>{
+      const text=container.dataset.text;
+      const color=container.dataset.color;
+      if(text) updateText(container,text,color,true); // 🔥 force flip
+    });
+  });
+}
+
+/* STATUS */
+async function fetchStatus(){
+  const res=await fetch("https://api.tfl.gov.uk/Line/Mode/tube,elizabeth-line/Status");
+  const data=await res.json();
+  const container=document.getElementById("status");
+
+  if(!container.childNodes.length){
+    data.forEach(()=>{
+      const row=document.createElement("div");
+      row.className="line-status";
+
+      const left=document.createElement("div");
+      left.className="left";
+
+      const right=document.createElement("div");
+      right.className="right";
+
+      row.appendChild(left);
+      row.appendChild(right);
+      container.appendChild(row);
+    });
+  }
+
+  data.forEach((line,i)=>{
+    const status=line.lineStatuses[0].statusSeverityDescription;
+
+    let color="#4caf50";
+    if(status.includes("Minor")) color="#ffb300";
+    if(status.includes("Severe")||status.includes("Suspended")) color="#ff5252";
+
+    const row=container.childNodes[i];
+
+    updateText(row.children[0],shortLines[line.name]||line.name,lineColors[line.name]||"#fff");
+    updateText(row.children[1],status,color);
+  });
+}
+
+/* 🚆 EASTBOUND ONLY */
+async function fetchTrains(){
+  const res=await fetch("https://api.tfl.gov.uk/Line/elizabeth/Arrivals");
+  const data=await res.json();
+
+  const eastbound=data
+    .filter(t =>
+      t.stationName &&
+      t.stationName.toLowerCase().includes("ealing broadway") &&
+      !t.destinationName.toLowerCase().includes("heathrow") &&
+      !t.destinationName.toLowerCase().includes("reading") &&
+      !t.destinationName.toLowerCase().includes("terminal")
+    )
+    .sort((a,b)=>new Date(a.expectedArrival)-new Date(b.expectedArrival))
+    .slice(0,6);
+
+  return eastbound.map(t=>({
+    text: shortStations[t.destinationName] || t.destinationName,
+    color: lineColors["Elizabeth"],
+    minsAway: mins(t.expectedArrival)
+  }));
+}
+
+/* FLIPBOARD */
+async function updateFlipboard(){
+  const trains=await fetchTrains();
+  const container=document.getElementById("flipboard");
+
+  if(!container.childNodes.length){
+    for(let i=0;i<6;i++){
+      const row=document.createElement("div");
+      row.className="flip-row";
+
+      const left=document.createElement("div");
+      left.className="left";
+
+      const right=document.createElement("div");
+      right.className="right";
+
+      row.appendChild(left);
+      row.appendChild(right);
+      container.appendChild(row);
+    }
+  }
+
+  trains.forEach((d,i)=>{
+    const row=container.childNodes[i];
+    updateText(row.children[0],d.text,d.color);
+    updateText(row.children[1],d.minsAway===0?"Due":d.minsAway+" min","#fff");
+  });
+}
+
+/* REFRESH */
+async function refresh(){
+  await fetchStatus();
+  await updateFlipboard();
+  document.getElementById("updated").innerText="Updated: "+new Date().toLocaleTimeString();
+}
+
+refresh();
+setInterval(refresh,60000);
+
+/* 🔥 PERFECT FLIP EVERY 12s */
+setInterval(idleFlip,30000);
+
+</script>
+</body>
+</html>
